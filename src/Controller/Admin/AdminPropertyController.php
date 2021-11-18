@@ -91,6 +91,7 @@ class AdminPropertyController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $this->em->persist($property);
             $this->em->flush();
+            $this->addFlash('success', 'Bien créé avec succés');
             return $this->redirectToRoute('admin.property.index');
         }
         return $this->render('admin/property/new.html.twig', [
@@ -113,6 +114,7 @@ class AdminPropertyController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->em->flush();
+            $this->addFlash('success', 'Bien modifié avec succés');
             return $this->redirectToRoute('admin.property.index');
         }
         return $this->render('admin/property/edit.html.twig', [
@@ -122,16 +124,22 @@ class AdminPropertyController extends AbstractController
     }
 
     /**
-     * @Route("/admin/property/{id}", name="admin.property.delete", methods={"POST", "DELETE"})
+     * @Route("/admin/property/{id}", name="admin.property.delete", methods={"POST"})
      * @param Property $property
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function delete(Property $property, Request $request)
     {
-        dd($request->isXmlHttpRequest());
+        if ($this->isCsrfTokenValid('delete' . $property->getId(), $request->get('_token'))) {
+            // dd($request->isXmlHttpRequest());
+            $this->em->remove($property);
+            $this->em->flush();
+            $this->addFlash('success', 'Bien supprimé avec succés');
+        }
+        // dd($request->isXmlHttpRequest());
         // $this->em->remove($property);
         // $this->em->flush();
-        return new Response('Suppression');
-        // return $this->redirectToRoute('admin.property.index');
+        // return new Response('Suppression');
+        return $this->redirectToRoute('admin.property.index');
     }
 }
